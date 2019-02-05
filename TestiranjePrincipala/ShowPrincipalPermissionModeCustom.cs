@@ -51,6 +51,7 @@ namespace TestiranjePrincipala
 			ChannelFactory<ISecureService> cf = new ChannelFactory<ISecureService>(GetBinding(), sr);
 			ISecureService client = cf.CreateChannel();
 			Console.WriteLine("Client received response from Method1: {0}", client.Method1("hello"));
+
 			((IChannel)client).Close();
 			Console.ReadLine();
 			service.Close();
