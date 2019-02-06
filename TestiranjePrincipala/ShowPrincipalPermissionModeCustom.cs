@@ -11,25 +11,21 @@ using System.ServiceModel.Description;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Common;
 
 namespace TestiranjePrincipala
 {
 	public class ShowPrincipalPermissionModeCustom
 	{
-		[ServiceContract]
-		interface ISecureService
-		{
-			[OperationContract]
-			string Method1(string request);
-		}
-
+	
 		[ServiceBehavior]
 		class SecureService : ISecureService
 		{
 			[PrincipalPermission(SecurityAction.Demand, Role = "everyone")]
 			public string Method1(string request)
 			{
-				return String.Format("Hello, {0}  \"{1}\"", Thread.CurrentPrincipal.Identity.Name, "aaa");
+				return String.Format("Hello, {0}  \"{1}\"", Thread.CurrentPrincipal.Identity.Name, ((CustomPrincipal)Thread.CurrentPrincipal).Username);
+				//return String.Format("Hello, {0}  \"{1}\"", Thread.CurrentPrincipal.Identity.Name, "a");
 			}
 		}
 
@@ -46,13 +42,13 @@ namespace TestiranjePrincipala
 			service.Authorization.PrincipalPermissionMode = PrincipalPermissionMode.Custom;
 			service.Open();
 
-			EndpointAddress sr = new EndpointAddress(
-				serviceUri, EndpointIdentity.CreateUpnIdentity(WindowsIdentity.GetCurrent().Name));
-			ChannelFactory<ISecureService> cf = new ChannelFactory<ISecureService>(GetBinding(), sr);
-			ISecureService client = cf.CreateChannel();
-			Console.WriteLine("Client received response from Method1: {0}", client.Method1("hello"));
+			//EndpointAddress sr = new EndpointAddress(
+			//	serviceUri, EndpointIdentity.CreateUpnIdentity(WindowsIdentity.GetCurrent().Name));
+			//ChannelFactory<ISecureService> cf = new ChannelFactory<ISecureService>(GetBinding(), sr);
+			//ISecureService client = cf.CreateChannel();
+			//Console.WriteLine("Client received response from Method1: {0}", client.Method1("hello"));
 
-			((IChannel)client).Close();
+			//((IChannel)client).Close();
 			Console.ReadLine();
 			service.Close();
 		}
@@ -89,14 +85,15 @@ namespace TestiranjePrincipala
 					return false;
 
 				context.Properties["Principal"] = new CustomPrincipal(identities[0], "perica");
+				//context.Properties["Principal"] = new CustomPrincipal(identities[0]);
 				return true;
 			}
 		}
 
-		class CustomPrincipal : IPrincipal
+		class CustomPrincipal : IMyPrincipal
 		{
 			IIdentity identity;
-			string username;
+			string username = string.Empty;
 
 			public CustomPrincipal(IIdentity identity)
 			{
@@ -117,12 +114,18 @@ namespace TestiranjePrincipala
 			public string Username
 			{
 				get { return this.username; }
+				set { this.username = value; }
 			}
 
 			public bool IsInRole(string role)
 			{
 				return true;
 			}
+		}
+
+		interface IMyPrincipal : IPrincipal
+		{
+			string Username { get; set; }
 		}
 	}
 }
