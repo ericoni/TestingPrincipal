@@ -24,8 +24,27 @@ namespace TestiranjePrincipala
 			[PrincipalPermission(SecurityAction.Demand, Role = "everyone")]
 			public string Method1(string request)
 			{
-				return String.Format("Hello, {0}  \"{1}\"", Thread.CurrentPrincipal.Identity.Name, ((CustomPrincipal)Thread.CurrentPrincipal).Username);
-				//return String.Format("Hello, {0}  \"{1}\"", Thread.CurrentPrincipal.Identity.Name, "a");
+				//IIdentity identity = null;
+				//Thread.CurrentPrincipal = new CustomPrincipal(identity, "hacker", new string[] { "cccc" });
+				return String.Format("Hello, {0}  \"{1}\" {2}", Thread.CurrentPrincipal.Identity.Name, ((CustomPrincipal)Thread.CurrentPrincipal).Username, ((CustomPrincipal)Thread.CurrentPrincipal).Roles[0]);
+			}
+
+			public string Method2()
+			{
+				WindowsIdentity callerWindowsIdentity = ServiceSecurityContext.Current.WindowsIdentity;
+				Console.WriteLine(Thread.CurrentPrincipal.Identity.Name); 
+
+				if (callerWindowsIdentity == null)
+				{
+					throw new InvalidOperationException
+				   ("The caller cannot be mapped to a WindowsIdentity");
+				}
+
+				using (callerWindowsIdentity.Impersonate())
+				{
+					Console.WriteLine(Thread.CurrentPrincipal.Identity.Name);
+				}
+				return "Poz";
 			}
 		}
 
@@ -42,13 +61,7 @@ namespace TestiranjePrincipala
 			service.Authorization.PrincipalPermissionMode = PrincipalPermissionMode.Custom;
 			service.Open();
 
-			//EndpointAddress sr = new EndpointAddress(
-			//	serviceUri, EndpointIdentity.CreateUpnIdentity(WindowsIdentity.GetCurrent().Name));
-			//ChannelFactory<ISecureService> cf = new ChannelFactory<ISecureService>(GetBinding(), sr);
-			//ISecureService client = cf.CreateChannel();
-			//Console.WriteLine("Client received response from Method1: {0}", client.Method1("hello"));
-
-			//((IChannel)client).Close();
+			Console.WriteLine("Starting server....");
 			Console.ReadLine();
 			service.Close();
 		}
@@ -84,8 +97,7 @@ namespace TestiranjePrincipala
 				if (obj == null || identities.Count <= 0)
 					return false;
 
-				context.Properties["Principal"] = new CustomPrincipal(identities[0], "perica");
-				//context.Properties["Principal"] = new CustomPrincipal(identities[0]);
+				context.Properties["Principal"] = new CustomPrincipal(identities[0], "perica", new string[]{ "a", "b"});
 				return true;
 			}
 		}
@@ -94,6 +106,7 @@ namespace TestiranjePrincipala
 		{
 			IIdentity identity;
 			string username = string.Empty;
+			string[] roles;
 
 			public CustomPrincipal(IIdentity identity)
 			{
@@ -104,6 +117,13 @@ namespace TestiranjePrincipala
 			{
 				this.identity = identity;
 				this.username = username;
+			}
+
+			public CustomPrincipal(IIdentity identity, string username, string [] roles)
+			{
+				this.identity = identity;
+				this.username = username;
+				this.roles = roles;
 			}
 
 			public IIdentity Identity
@@ -117,15 +137,28 @@ namespace TestiranjePrincipala
 				set { this.username = value; }
 			}
 
+			public string []Roles
+			{
+				get { return this.roles; }
+				set { this.roles = value; }
+			}
+
 			public bool IsInRole(string role)
 			{
 				return true;
+			}
+
+			public WindowsImpersonationContext Impersonate()
+			{
+				throw new NotImplementedException();
 			}
 		}
 
 		interface IMyPrincipal : IPrincipal
 		{
 			string Username { get; set; }
+
+			WindowsImpersonationContext Impersonate();
 		}
 	}
 }

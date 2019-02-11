@@ -14,7 +14,6 @@ namespace TestiranjePrincipala
 			{
 				ShowPrincipalPermissionModeCustom ppwm = new ShowPrincipalPermissionModeCustom();
 				ppwm.Run();
-
 			}
 			catch (Exception exc)
 			{

@@ -12,6 +12,8 @@ namespace Common
 	{
 		[OperationContract]
 		string Method1(string request);
+		[OperationContract]
+		string Method2();
 	}
 
 }
