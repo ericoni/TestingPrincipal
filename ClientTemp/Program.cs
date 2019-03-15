@@ -21,8 +21,8 @@ namespace ClientTemp
 			ChannelFactory<ISecureService> cf = new ChannelFactory<ISecureService>(GetBinding(), sr);
 
 			ISecureService client = cf.CreateChannel();
-			Console.WriteLine("Client received response from Method1: {0}", client.Method2());
-			//Console.WriteLine("Client received response from Method1: {0}", client.Method1("hello"));
+			//Console.WriteLine("Client received response from Method1: {0}", client.Method2());
+			Console.WriteLine("Client received response from Method1: {0}", client.Method1("hello"));
 
 			Console.Read();
 			((IChannel)client).Close();

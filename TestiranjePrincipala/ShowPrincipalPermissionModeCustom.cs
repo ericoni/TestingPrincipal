@@ -62,6 +62,7 @@ namespace TestiranjePrincipala
 			service.Open();
 
 			Console.WriteLine("Starting server....");
+			var ident = WindowsIdentity.GetCurrent();
 			Console.ReadLine();
 			service.Close();
 		}
