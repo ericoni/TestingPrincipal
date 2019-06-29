@@ -34,7 +34,7 @@ public class ImpersonationDemo
 
 			Console.Write("Enter the login of a user on {0} that you wish to impersonate: ", domainName);
 			//userName = Console.ReadLine();
-			userName = "test";
+			userName = "testUsername";
 
 			Console.Write("Enter the password for {0}: ", userName);
 
@@ -42,16 +42,16 @@ public class ImpersonationDemo
 			//This parameter causes LogonUser to create a primary token.
 			const int LOGON32_LOGON_INTERACTIVE = 2;
 
-			string pw = "ftn"; //mali2#3@
+			string pw = "a"; //mali2#3@
 
 			// Call LogonUser to obtain a handle to an access token.
-			bool returnValue = LogonUser(userName, domainName, pw,//Console.ReadLine(),
+			bool logonUserReturnValue = LogonUser(userName, domainName, pw,//Console.ReadLine(),
 				LOGON32_LOGON_INTERACTIVE, LOGON32_PROVIDER_DEFAULT,
 				out safeTokenHandle);
 
 			Console.WriteLine("LogonUser called.");
 
-			if (false == returnValue)
+			if (false == logonUserReturnValue)
 			{
 				int ret = Marshal.GetLastWin32Error();
 				Console.WriteLine("LogonUser failed with error code : {0}", ret);
@@ -59,7 +59,7 @@ public class ImpersonationDemo
 			}
 			using (safeTokenHandle)
 			{
-				Console.WriteLine("Did LogonUser Succeed? " + (returnValue ? "Yes" : "No"));
+				Console.WriteLine("Did LogonUser Succeed? " + (logonUserReturnValue ? "Yes" : "No"));
 				Console.WriteLine("Value of Windows NT token: " + safeTokenHandle);
 
 				// Check the identity.
